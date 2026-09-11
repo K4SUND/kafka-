@@ -1,0 +1,2 @@
+bin\windows\kafka-storage.bat format -t %random%%random% -c config\server.properties
+bin\windows\kafka-server-start.bat config\server.properties
