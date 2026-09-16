@@ -1,0 +1,10 @@
+{
+  "namespace": "org.example.TruckAssignment.avro",
+  "type": "record",
+  "name": "TruckCoordinates",
+  "fields": [
+    {"name": "Id","type": "string"},
+    {"name": "latitude","type": "string"},
+    {"name": "longitude","type": "string"}
+  ]
+}

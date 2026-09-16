@@ -11,7 +11,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
 
-public class OrderConsumer {
+public class OrderConsumerRealTime {
 
     public static void main(String[] args) {
 
@@ -37,30 +37,32 @@ public class OrderConsumer {
         //subscription
 //        consumer.subscribe(Collections.singletonList("OrderTopic"));
         consumer.subscribe(Collections.singletonList("OrderCSTopic"));
-        //polling
-//        consumer.poll(Duration.ZERO);
-//        consumer.poll(Duration.ofMillis(1000));
 
 
-        ConsumerRecords<String,Order> orders = consumer.poll(Duration.ofSeconds(20));
-        for(ConsumerRecord<String,Order> order : orders)
-        {
-//            System.out.println("Product Name "+order.key());
-//            System.out.println("Quantity "+order.value());
+        // infinitely
+        try {
+            while (true) {
 
-            String customerName = order.key();
-            Order record = order.value();
-            System.out.println("Customer Name: "+customerName);
-            System.out.println("Product: "+record.getProduct());
-            System.out.println("Quantity: "+record.getQuantity());
+                // start polling
+                // after 20s again poll
+                ConsumerRecords<String, Order> orders = consumer.poll(Duration.ofSeconds(20));
 
 
+                for (ConsumerRecord<String, Order> order : orders) {
 
+                    String customerName = order.key();
+                    Order record = order.value();
+                    System.out.println("Customer Name: " + customerName);
+                    System.out.println("Product: " + record.getProduct());
+                    System.out.println("Quantity: " + record.getQuantity());
+
+
+                }
+            }
+
+        } finally {
+            consumer.close();
         }
-
-        consumer.close();
-
-
 
 
     }
