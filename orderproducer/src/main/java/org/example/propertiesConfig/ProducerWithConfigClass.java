@@ -4,6 +4,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.example.POJO.Order;
+import org.example.async.OrderCallback;
 
 
 import java.util.Properties;
@@ -19,27 +20,50 @@ public class ProducerWithConfigClass {
         props.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
         props.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.example.POJO.customSerializerAndDeserializer.OrderSerializer");
 
+        // transaction ID -- producer Id
+        // -- should be different for producer instances
+        props.setProperty(ProducerConfig.TRANSACTIONAL_ID_CONFIG,"order-producer-1");
+        // init Transaction, send -- blocking , so timeout config
+//        props.setProperty(ProducerConfig.MAX_BLOCK_MS_CONFIG,"1000");
 
-        //
-        props.setProperty(ProducerConfig.ACKS_CONFIG, "all"); // 0,1,all
-        props.setProperty(ProducerConfig.BUFFER_MEMORY_CONFIG,"343434") ; // default ->256MB
-        props.setProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG,"gzip");  //gzip, snappy,lz4
-        props.setProperty(ProducerConfig.RETRIES_CONFIG,"2");
-        props.setProperty(ProducerConfig.RECONNECT_BACKOFF_MS_CONFIG,"400");
+
 
 
 
         KafkaProducer<String, Order> producer = new KafkaProducer<String, Order>(props);
-        Order order = new Order();
-        order.setCustomerName("Kasun");
-        order.setProduct("Laptop");
-        order.setQuantity(4);
-        ProducerRecord<String, Order> record = new ProducerRecord<>("OrderCSTopic", order.getCustomerName(), order);
+
+        // order1
+        Order orderOne = new Order();
+        orderOne.setCustomerName("Kasun");
+        orderOne.setProduct("Laptop");
+        orderOne.setQuantity(4);
+
+        // order2
+        Order orderTwo= new Order();
+        orderTwo.setCustomerName("Thimal");
+        orderTwo.setProduct("Mobile");
+        orderTwo.setQuantity(3);
+
+        // init transaction
+        producer.initTransactions();
+
+        ProducerRecord<String, Order> recordOne = new ProducerRecord<>("OrderCSTopic", orderOne.getCustomerName(), orderOne);
+        ProducerRecord<String, Order> recordTwo = new ProducerRecord<>("OrderCSTopic", orderTwo.getCustomerName(), orderTwo);
 
         try {
-            producer.send(record);
+
+            // transaction --
+            producer.beginTransaction();
+
+            // not need callback -- because of commitTransaction
+            producer.send(recordOne,new OrderCallback());
+            producer.send(recordTwo);
+            producer.commitTransaction();  // send exception if failed
 
         } catch (Exception e) {
+
+            //abort transaction
+            producer.abortTransaction();
             e.printStackTrace();
 
         } finally {
