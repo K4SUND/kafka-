@@ -1,0 +1,16 @@
+
+// create topic
+kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic wordCount-input
+
+// log to topic as producer
+kafka-console-producer --bootstrap-server localhost:9092 --topic wordCount-input
+>Hello
+>How Are You?
+
+
+//create output topic
+kafka-topics --create --bootstrap-server localhost:9092 -replication-factor 1 --partitions 1 -topic wordCount-output
+
+
+// log in to consumer console
+kafka-console-consumer --bootstrap-server localhost:9092 --topic wordCount-output --from-beginning --property print.key=true --property print.value=true --property key.deserializer=org.apache.kafka.common.serialization.StringDeserializer --property value.deserializer=org.apache.kafka.common.serialization.LongDeserializer

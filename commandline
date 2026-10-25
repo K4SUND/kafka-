@@ -1,2 +1,15 @@
-bin\windows\kafka-storage.bat format -t %random%%random% -c config\server.properties
+
+//Initialize storage
+//cluster Id
+bin\windows\kafka-storage.bat random-uuid
+
+//
+bin\windows\kafka-storage.bat format -t ibwrsUsISRmXFJCjLOi79A -c config\server.properties
+
+
+//start 
 bin\windows\kafka-server-start.bat config\server.properties
+
+
+//test
+//second terminal
